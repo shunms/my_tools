@@ -1,0 +1,1210 @@
+# .bash_profile
+
+# Get the aliases and functions
+#if [ -f ~/.bashrc ]; then
+#	. ~/.bashrc
+#fi
+
+# User specific environment and startup programs
+unset USERNAME
+
+# Most applications support several languages for their output.
+# To make use of this feature, simply uncomment one of the lines below or
+# add your own one (see /usr/share/locale/locale.alias for more codes)
+#
+#export LANG=de_DE.UTF-8	# uncomment this line for German output
+#export LANG=fr_FR.UTF-8	# uncomment this line for French output
+#export LANG=es_ES.UTF-8	# uncomment this line for Spanish output
+
+
+# Some people don't like fortune. If you uncomment the following lines,
+# you will have a fortune each time you log in ;-)
+
+#if [ -x /usr/bin/fortune ] ; then
+#    echo
+#    /usr/bin/fortune
+#    echo
+#fi
+
+################################
+# Set HOSTNAME variable
+################################
+HOSTNAME=`hostname`
+export HOSTNAME
+
+
+################################
+# Set Prompt
+################################
+ID_USER=`id | awk '{print $1}' | awk -F"(" '{print $2}'| awk -F")" '{print $1}'`
+PS1='${HOSTNAME} [${PWD}][${ID_USER}] [ `if [ -f /JAILID ]; then cat /JAILID; fi` ] \n$ '
+export PS1
+
+################################
+# Setup CVS
+################################
+#export CVSROOT=:pserver:vnambiar@birch:/source/cvs/cvsroot-cbs
+#export CVS_RSH=/usr/bin/ssh
+
+
+################################
+#
+################################
+#export CROSS_COMPILE=ppc_82xx-
+PATH=$PATH:~/bin:/usr/local/bin:/source/tools/cbs/bin:${HOME}/bin:/sbin:/bin:~/templates/scripts:/usr/sbin:/usr/bin:.:/opt/sourcenav/bin
+export PATH
+
+############################
+# Figure out the OS
+############################
+OS_NAME=`uname -s`
+
+###############################
+# Linux specific ENV variables
+###############################
+if [ ${OS_NAME} == "Linux" ]; then
+umask 002
+CLEARCASE_BIN=/opt/rational/clearcase/bin
+CLEARQUEST_BIN=/opt/rational/clearquest/bin
+WIND_RIVER_LINUX_BIN=/opt/wrl
+ECLIPSE_BIN=/opt/eclipse
+NX_BIN=/usr/NX/bin
+ADVENTNET_BIN=~/snmp/AdventNet/C-Agent
+PATH=${PATH}:${CLEARCASE_BIN}:${ECLIPSE_BIN}:${NX_BIN}:${ADVENTNET_BIN}:${CLEARQUEST_BIN}:${WIND_RIVER_LINUX_BIN}
+export MASTER_ROOT=/tpos/tlp/masters
+
+
+#Export perllib for clearquest scripts
+export PERLIB=$PERLIB:/devvob/integration/build_env/perl
+
+#Export this to fix clearcase xlsvtreee core dumps
+export LC_ALL=C
+
+#Add my man path
+MY_LOCAL_MAN=~/man
+USR_LOCAL_MAN=/usr/local/share/man
+MANPATH=${MY_LOCAL_MAN}:${MANPATH}:${USR_LOCAL_MAN}
+export MANPATH
+
+#JAVA related env
+#JAVA_HOME is not needed if "java -version" points to the right version
+# This mean /usr/bin/java is pointing to the right thing. To override use JAVA_HOME:
+#export JAVA_HOME=/usr/java/jdk1.6.0_26
+#export PATH=${JAVA_HOME}/jre/bin:${JAVA_HOME}/bin:${PATH}
+export JBOSS_HOME=/view/vnambiar_cas_nvm/standalonevob/jboss/jboss-6.0.0
+export ANT_HOME=/usr/share/apache-ant-1.8.2
+export PATH=${ANT_HOME}/bin:${PATH}
+
+
+CLEARQUEST_LIB_PATH=/opt/rational/clearquest/linux_x86/odbc/lib
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/local/lib:/lib:${CLEARQUEST_LIB_PATH}
+
+ID_USER=`id | awk '{print $1}' | awk -F"(" '{print $2}'| awk -F")" '{print $1}'`
+#CT_VIEW=`cleartool pwv | grep "Set view" | awk '{print $3}'`
+#CT_VIEW=`git branch | grep "*" | awk '{print $2}' 2> /dev/null`
+if [[ $UID -eq 0 ]]; then
+PS1='${ID_USER}@${HOSTNAME} [${PWD}]\n# '
+else
+PS1='${ID_USER}@${HOSTNAME} [${PWD}]\n$ '
+fi
+export PS1
+
+#MIB paths and content. Works only if a base clearcase view is set since
+#/devvob needs to exist.
+MIBS=TP-MIB:OSSGW-MIB:SMLC-MIB:LMU-MIB:LG-MIB:WLG-MIB:AGENT-CONFIG-MIB:SNMPv2-MIB:SG-MIB
+MIBDIRS=/devvob/mibs:/devvob/mibs/ietf:/devvob/mibs/vendor
+export MIBS MIBDIRS
+fi
+
+
+################################
+#   CSCOPE DB Location
+################################
+export CSCOPE_DB=
+
+
+
+#####################################
+## Aliases
+#####################################
+alias ls="ls --color=tty"
+alias quick_help="cd ~/my_docs/quick_help"
+alias my_docs="cd ~/my_docs"
+alias bug_notes="cd ~/my_docs/bug_notes"
+alias ct="cleartool"
+alias dirs="dirs -v"
+alias pu="pushd"
+alias po="popd"
+#Force tmux to always assume that the terminal has 256 color support
+alias tmux="tmux -2"
+
+function backup_my_stuff()
+{
+    BACKUP_DIR=~/backup
+    DIR_NAME=`date +%m-%d-%y_%H-%M-%S`
+
+    mkdir -p ${BACKUP_DIR}/${DIR_NAME}
+    pushd ${BACKUP_DIR}/${DIR_NAME}
+    cp ~/.bash_profile ./dot_bashrc_profile
+    cp ~/.bashrc ./dot_bashrc
+    cp ~/.vimrc ./dot_vimrc
+    cp -r ~/.vim ./dot_vim
+    #cp -r ~/.vnc ./dot_vnc
+    cp -r ~/.ssh ./dot_ssh
+    cp -r ~/.screenrc ./dot_screenrc
+    cp -r ~/.tmux.conf ./dot_tmux.conf
+    cp -r ~/.kermrc ./dot_kermrc
+    cp -r ~/templates ./templates
+    cp -r ~/.gitconfig ./dot_gitconfig
+    cp /etc/hosts ./etc_hosts
+    cp -r ~/bin ./bin
+    popd
+    echo "Backed up config files to ${BACKUP_DIR}/${DIR_NAME}"
+}
+
+#####################################
+## Which app is using/locking a file
+#####################################
+function list_open_files()
+{
+    lsof
+}
+
+function diff_dir()
+{
+    if [ ! "$1" -o ! "$2" ]; then
+        echo "Usage: diff_dir <dir1> <dir2>"
+        return 1
+    fi
+    if [ ! -e "$1" ]; then
+        echo "Could not find dir: $1"
+        return 1
+    fi
+    if [ ! -e "$2" ]; then
+        echo "Could not find dir: $2"
+        return 1
+    fi
+    diff -r -q  -x CVS \
+        -x *.o \
+        -x *.a \
+        -x .depend \
+        -x *.bin \
+        -x *.map \
+        -x *.html \
+        $1 $2
+}
+
+function diff_dir_more()
+{
+    if [ ! "$1" -o ! "$2" ]; then
+        echo "Usage: diff_dir <dir1> <dir2>"
+        return 1
+    fi
+    if [ ! -e "$1" ]; then
+        echo "Could not find dir: $1"
+        return 1
+    fi
+    if [ ! -e "$2" ]; then
+        echo "Could not find dir: $2"
+        return 1
+    fi
+    diff -r -x CVS \
+        -x *.o \
+        -x *.a \
+        -x *.html \
+        -x .depend \
+        -x *.bin \
+        -x *.map \
+        $1 $2
+}
+
+templateDir=~/templates
+
+#To execute a ppc based debugger
+function ppc82()
+{
+    if [ ! $1 ]
+    then
+        echo "Usage: ppc82 <app> <app_cmdline>"
+        echo "Eg: ppc82 gdb vmlinux"
+        return
+    fi
+
+    #Execute the command
+    /opt/eldk/usr/bin/ppc_82xx-$1
+}
+
+#Make sure SRC_DIR & SRC_FILE_DB passed to this function is the absolute path
+function add_source_dir()
+{
+    SRC_FILE_DB=${1}
+    SRC_DIR=${2}
+
+    #debug
+    echo "Scanning sources in ${SRC_DIR}"
+
+    # To get absolute path and not relative paths in the DB file
+    pushd /  > /dev/null 2>&1
+
+    # Extract dir and move on when args are passed with SRC_DIR as in build_smlc_db
+    #for x in ${SRC_DIR}
+    #do
+    #  if [ ! -d ${x} ]; then
+    #    echo "  ${x} is NOT PRESENT"
+    #    return 1
+    #  fi
+    #  echo
+    #  echo "  Adding ${x}"
+    #  break
+    #done
+
+    #FILES_TO_FIND="-name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cxx' -o -name '*.idl' -o -name '*.S' -o -name '*.asm' -o -name '*.make' -o -name '*.mk' -o -name '*.mak' -o -name 'env.*' -o  -name '*.clib' -o -name '*.rules' -o -name 'Makefile' -o -name 'dbadm' -o -name '*.pl'"
+
+    #debug
+    #echo "FILES_TO_FIND=${FILES_TO_FIND}"
+
+    #echo "find ${SRC_DIR} ${FILES_TO_FIND} >> ${SRC_FILE_DB}"
+    #find ${SRC_DIR} ${FILES_TO_FIND} >> ${SRC_FILE_DB}
+
+    find ${SRC_DIR} -name '*.c' -o -name '*.hpp' -o -name '*.h' -o -name '*.cpp' -o -name '*.cxx' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.idl' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.xml' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.S' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.asm' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.make' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.cmake' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.mk' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.mak' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name 'env.*' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.clib' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.rules' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name 'Makefile' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name 'dbadm' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.pl' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.txt' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.awk' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.sh' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.bash' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.bashrc' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.tmpl' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.conf' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name 'svt_functions' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name 'svtctl' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.defs' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.dts' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.pm' >> ${SRC_FILE_DB}
+    find ${SRC_DIR} -name '*.desktop' >> ${SRC_FILE_DB}
+
+    popd  > /dev/null 2>&1
+
+    return 0
+}
+
+#Build cscope  database
+function build_db()
+{
+
+    if [ ! $1 ]
+    then
+        echo "usage: build_db db_name directory"
+        echo
+        return
+    fi
+
+    if [ ! $2 ]
+    then
+        echo "usage: build_db db_name directory"
+        echo
+        return
+    fi
+
+    if [ ! -d $2 ]
+    then
+        echo "build_db ERROR: $2 is not a valid directory name"
+        echo
+        return
+    fi
+
+    #Save current dir on stack
+    pushd $2 > /dev/null 2>&1
+
+    #Define paths
+    echo
+    PROJ_DIR=`pwd`  #Note this HAS to be absolute path
+    echo "PROJ_DIR = $PROJ_DIR"
+    BUILD_FILES=~/cscope/$1.files
+    BUILD_DB=~/cscope/$1.out
+
+    #Check to see if cscope dir exists, if not create it
+    if [ ! -d ~/cscope ]
+    then
+        echo -n "cscope DB directory does not exist, creating one now..."
+        mkdir ~/cscope
+        echo "DONE"
+    else
+        echo "Using exisiting cscope DB directory"
+    fi
+
+    #Delete previous database to force recreation
+    echo -n "Deleting previous DB..."
+    #rm -f ~/cscope/cscope.out
+    rm -f ${BUILD_DB}
+    rm -f ${BUILD_FILES}
+    echo "DONE"
+
+    #Now build an absolute path file database to give to cscope to parse
+    # Add source directories to parse in here
+    echo "Scanning for sources..."
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}
+    echo "  DONE"
+
+    #Now build cscope database
+    echo -n "Building cscope DB at $BUILD_DB..."
+    cd ~/cscope
+    cscope -b -i $BUILD_FILES -f $BUILD_DB
+    echo "DONE"
+
+    #Revert to original execution dir
+    popd > /dev/null 2>&1
+}
+
+function build_quick_kernel_db()
+{
+    if [ ! $1 ]
+    then
+        echo "usage: build_quick_kern_db db_name"
+        echo "Always builds from pwd!!"
+        echo
+        return
+    fi
+
+    DB_FILES=$1.files
+    DB_NAME=$1.out
+
+    echo "rm -fr ${DB_FILES}"
+    rm -fr ${DB_FILES}
+
+    echo "rm -fr ${DB_NAME}"
+    rm -fr ${DB_NAME}
+
+    echo "Building ${DB_FILES}, please wait..."
+    find `pwd` -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cxx' -o -name '*.idl' -o -name '*.S' -o -name '*.asm' -o -name '*.make' -o -name '*.mk' -o -name '*.mak' -o -name 'env.*' -o -name '*.clib' -o -name '*.rules' -o -name 'Makefile' -o -name 'dbadm' -o -name '*.pl' -o -name '*.spec' -o -wholename '*/sparc' -prune -o -wholename '*/Documentation' -prune -o -wholename '*/wrlinux_quilt_patches' -prune -o -wholename '*/wrlinux_quilt_pc' -prune -o -wholename '*/dependencies' -prune -o -wholename '*/wrlinux' -prune -o -wholename '*/alpha' -prune -o -wholename '*/arm26' -prune -o -wholename '*/frv' -prune  -o -wholename '*/m32r' -prune  -o -wholename '*/m68knommu' -prune -o -wholename '*/parisc' -prune -o -wholename '*/ppc64' -prune -o -wholename '*/x86_64' -prune -o -wholename '*/arm' -prune -o -wholename '*/cris' -prune -o -wholename '*/h8300' -prune -o -wholename '*/m68k' -prune  -o -wholename '*/mips' -prune -o -wholename '*/ppc' -prune -o -wholename '*/s390' -prune -o -wholename '*/sh64' -prune -o -wholename '*/sparc64' -prune -o -wholename '*/v850' -prune -o -wholename '*/xtensa' -prune > ${DB_FILES}
+
+    echo "Building ${DB_NAME}, please wait..."
+    cscope -b -i ${DB_FILES} -f ${DB_NAME}
+    echo "Done"
+}
+
+#Build gtags database
+function build_db_gtags()
+{
+
+    if [ ! $1 ]
+    then
+        echo "usage: build_db_gtags db_name directory"
+        echo
+        return
+    fi
+
+    if [ ! $2 ]
+    then
+        echo "usage: build_db_gtags db_name directory"
+        echo
+        return
+    fi
+
+    if [ ! -d $2 ]
+    then
+        echo "build_db_gtags ERROR: $2 is not a valid directory name"
+        echo
+        return
+    fi
+
+    #Save current dir on stack
+    pushd $2 > /dev/null 2>&1
+
+    #Define paths
+    echo
+    PROJ_DIR=`pwd`  #Note this HAS to be absolute path
+    echo "PROJ_DIR = $PROJ_DIR"
+
+    #Delete previous database to force recreation
+    if [ -e ~/cscope/$1 ]; then
+        echo -n "~/cscope/$1 exists. Deleting it..."
+        rm -fr ~/cscope/$1
+        echo "DONE"
+    fi
+    mkdir -p ~/cscope/$1
+    BUILD_FILES=~/cscope/$1/$1.files
+    BUILD_DB=~/cscope/$1
+
+    #Check to see if cscope dir exists, if not create it
+    if [ ! -d ~/cscope ]
+    then
+        echo -n "cscope DB directory does not exist, creating one now..."
+        mkdir ~/cscope
+        echo "DONE"
+    else
+        echo "Using exisiting cscope DB directory"
+    fi
+
+    #Now build an absolute path file database to give to gtags to parse
+    # Add source directories to parse in here
+    echo "Scanning for sources..."
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}
+    echo "  DONE"
+
+    #Now build cscope database
+    echo -n "Building gtags DB at $BUILD_DB..."
+    gtags -f ${BUILD_FILES} ${BUILD_DB}
+    echo "DONE"
+
+    #Revert to original execution dir
+    popd > /dev/null 2>&1
+}
+
+function build_kernel_db()
+{
+    L_FUNC=build_kernel_db
+    USAGE="Usage: ${L_FUNC} db_name directory [drivers]\n"
+    USAGE+="NOTE: Specify \"drivers\" if you want it included in db"
+
+    if [ -z ${1} ]; then
+        echo -e ${USAGE}
+        echo
+        return 1
+    fi
+
+    if [ ! $2 ]
+    then
+        echo -e ${USAGE}
+        echo
+        return 1
+    fi
+
+    if [ ! -d $2 ]
+    then
+        echo "${L_FUNC} ERROR: $2 is not a valid directory name"
+        echo
+        return 1
+    else
+        if [ ! -d ${2}/arch ]; then
+            echo "${L_FUNC} ERROR: ${2} is not a valid kernel directory"
+            echo
+            return 1
+        fi
+    fi
+
+    #Save current dir on stack
+    pushd $2 > /dev/null 2>&1
+
+    #Define paths
+    PROJ_DIR=`pwd`  #Note this HAS to be absolute path
+    echo
+    echo "PROJ_DIR = ${PROJ_DIR}"
+    BUILD_FILES=~/cscope/$1.files
+    BUILD_DB=~/cscope/$1.out
+
+    #Check to see if cscope dir exists, if not create it
+    if [ ! -d ~/cscope ]
+    then
+        echo -n "cscope DB directory does not exist, creating one now..."
+        mkdir ~/cscope
+        echo "DONE"
+    else
+        echo "Using exisiting cscope DB directory"
+    fi
+
+    #Delete previous database to force recreation
+    echo -n "Deleting previous DB..."
+    #rm -f ~/cscope/cscope.out
+    rm -f ${BUILD_DB}
+    rm -f ${BUILD_FILES}
+    echo "DONE"
+
+    #Now build an absolute path file database to give to cscope to parse
+    # Add source directories to parse in here
+    echo "Scanning for sources..."
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/Documentation
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/arch/i386
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/arch/x86
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/crypto
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/block
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/debian
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/debian.master
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/drivers
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/firmware
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/fs
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/init
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/ipc
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/kernel
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/lib
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/mm
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/net
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/acpi
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/linux
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/math-emu
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/net
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/pcmcia
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/scsi
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/video
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/asm-i386
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/include/asm
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/scripts
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/security
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/samples
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/kdb
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/security
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/sound
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/tools
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/ubuntu
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/usr
+    add_source_dir ${BUILD_FILES} ${PROJ_DIR}/virt
+
+    if [ "${3}" == "drivers" ]; then
+        add_source_dir ${BUILD_FILES} ${PROJ_DIR}/drivers
+    fi
+    echo "  DONE"
+
+    #Now build cscope database
+    echo -n "Building cscope DB at $BUILD_DB..."
+    cd ~/cscope
+    cscope -b -i $BUILD_FILES -f $BUILD_DB
+    echo "DONE"
+
+    #Revert to original execution dir
+    popd > /dev/null 2>&1
+}
+
+function create_vnc_desktop()
+{
+    if [ ! "$1" ]; then
+        echo "usage: create_vnc_desktop <desktop_number> <desktop_name> <desktop_resolution>"
+        return 1
+    fi
+
+    desktop_number=$1
+    desktop_name=$2
+    screen_size=$3
+    vncserver :${desktop_number} -name ${desktop_name} -geometry ${screen_size} >& /dev/null
+    if [ "$?" -eq 0 ]; then
+        echo \
+            "cvd> \"${desktop_name}\" desktop created at disp :${desktop_number}"
+        return 0
+    else
+        echo "cvd> ${desktop_name} desktop is already running";
+        return 1
+    fi
+}
+
+function destroy_vnc_desktop()
+{
+    if [ ! "$1" ]; then
+        echo "usage: destroy_vnc_desktop <desktop_number>"
+        return 1
+    fi
+
+    desktop_number=$1
+    vnc_dot=~/.vnc
+    vncserver -kill :${desktop_number} >& /dev/null
+    if [ "$?" -eq 0 ]; then
+        echo "dvd> Destroyed vnc desktop :${desktop_number}"
+    else
+        echo "dvd> Could not destroy vnc desktop :${desktop_number}"
+
+        #dump log file if user wants it
+        vnc_log_file=${vnc_dot}/${HOSTNAME}:${desktop_number}.log
+        if [ -e ${vnc_log_file} ]; then
+            echo "Do you want to see the log file for desktop ${desktop_number}? (y/n) n"
+            read choice
+            if [ "$choice" == "y" ]; then
+                #echo "Got y for the question"
+                echo "dvd> Log file for vnc desktop ${desktop_number} says:"
+                cat ${vnc_log_file}
+            fi
+        fi
+
+        #kill vnc pid if user wants to manually kill it
+        vnc_pid_file=${vnc_dot}/${HOSTNAME}:${desktop_number}.pid
+        if [ -e "${vnc_desktop_pid}" ]; then
+            vnc_desktop_pid=`cat ${vnc_pid_file}`
+            echo "dvd> desktop :${desktop_number} has PID = ${vnc_desktop_pid}"
+            echo "dvd> Do you want me to kill this desktop with PID = ${vnc_desktop_pid} ? (y/n)n"
+            read choice
+            if [ "$choice" == "y" ]; then
+                #echo "Got y for the question"
+                kill -9 ${vnc_desktop_pid}
+                if [ "$?" -eq 0 ]; then
+                    echo "dvd> desktop :{$desktop_number} with pid=${vnc_desktop_pid} has been killed"
+                else
+                    echo "dvd> failed to kill pid=${vnc_desktop_pid}"
+                    return 1
+                fi
+            else
+                #echo "Did not get y for the question"
+                echo "dvd> Aborting destruction of desktop :${desktop_number}!"
+            fi
+        fi
+    fi
+    return 0
+}
+
+
+function connect_to_my_desktop()
+{
+    vncviewer -fullscreen 127.0.0.1:1
+}
+
+function destroy_my_desktops()
+{
+    #destroy_vnc_desktop 1
+    destroy_vnc_desktop 2
+    #destroy_vnc_desktop 7
+    #destroy_vnc_desktop 20
+    #destroy_vnc_desktop 30
+    #destroy_vnc_desktop 40
+    #destroy_vnc_desktop 50
+}
+
+function show_desktops()
+{
+    ls ~/.vnc/*.pid 2> /dev/null
+}
+
+
+function myide()
+{
+    xterm -geometry 80X24+50+40&
+    xterm -geometry 80X24+50+430&
+    xterm -geometry 80X24+50+820&
+
+    sleep 1
+
+    xterm -geometry 80X24+0+0&
+    xterm -geometry 80x24+0+390&
+    xterm -geometry 80x24+0+780&
+}
+
+function cvs_status()
+{
+    if [ $1 ]
+    then
+        if [ $1 = "more" ]
+        then
+            # Print a more detailed report
+            #pushd ~/prj/srcr1
+            cvs -q status | grep -A 3 -B 1 "Needs Patch"
+            cvs -q status | grep -A 3 -B 1 "Modified"
+            cvs -q status | grep -A 3 -B 1 "Needs Merge"
+            cvs -q status | grep -A 3 -B 1 "Needs Checkout"
+            cvs -q status | grep -A 3 -B 1 "File had conflicts on merge"
+            #cvs -q status | grep -A 3 -B 1 "?"
+            #popd
+        else
+            if [ $1 = "demo" ]
+            then
+                #Move to a new screen and call the cvs_status script
+                #pushd ~/demo/prj/srcr1
+                cvs -q status | grep "Needs Patch"
+                cvs -q status | grep "Modified"
+                cvs -q status | grep "Needs Merge"
+                cvs -q status | grep "Needs Checkout"
+                cvs -q status | grep "File had conflicts on merge"
+                #cvs -q status | grep "?"
+                #popd
+            fi
+            if [ $1 = "branch" ]
+            then
+                #pushd ~/branch/prj/srcr1
+                cvs -q status | grep "Needs Patch"
+                cvs -q status | grep "Modified"
+                cvs -q status | grep "Needs Merge"
+                cvs -q status | grep "Needs Checkout"
+                cvs -q status | grep "File had conflicts on merge"
+                #cvs -q status | grep "?"
+                #popd
+            fi
+            if [ $1 = "kernel" ]
+            then
+                #pushd ~/prj/ext/denx.de/linuxppc_optovia
+                cvs -q status | grep "Needs Patch"
+                cvs -q status | grep "Modified"
+                cvs -q status | grep "Needs Merge"
+                cvs -q status | grep "Needs Checkout"
+                cvs -q status | grep "File had conflicts on merge"
+                #cvs -q status | grep "?"
+                #popd
+            fi
+            if [ $1 = "-d" ]
+            then
+                if [ -d $2 ]
+                then
+                    if [ ! $3 ]
+                    then
+                        #Move to a new screen and call the cvs_status script
+                        pushd $2 > /dev/null 2>&1
+                        echo "Checking cvs changes in $2"
+                        cvs -q status | grep "Needs Patch"
+                        cvs -q status | grep "Modified"
+                        cvs -q status | grep "Needs Merge"
+                        cvs -q status | grep "Needs Checkout"
+                        cvs -q status | grep "File had conflicts on merge"
+                        #cvs -q status | grep "?"
+                        popd > /dev/null 2>&1
+                    elif [ $3 = "more" ]
+                    then
+                        # Print a more detailed report
+                        pushd $2 > /dev/null 2>&1
+                        echo "Checking cvs changes in $2"
+                        cvs -q status | grep -A 3 -B 1 "Needs Patch"
+                        cvs -q status | grep -A 3 -B 1 "Modified"
+                        cvs -q status | grep -A 3 -B 1 "Needs Merge"
+                        cvs -q status | grep -A 3 -B 1 "Needs Checkout"
+                        cvs -q status | grep -A 3 -B 1 "File had conflicts on merge"
+                        #cvs -q status | grep -A 3 -B 1 "?"
+                        popd > /dev/null 2>&1
+                    fi
+                else
+                    echo "$2 is not a valid directory!"
+                fi
+            fi
+        fi
+    else
+        #Move to a new screen and call the cvs_status script
+        pushd ~/prj/srcr1 > /dev/null 2>&1
+        cvs -q status | grep "Needs Patch"
+        cvs -q status | grep "Modified"
+        cvs -q status | grep "Needs Merge"
+        cvs -q status | grep "Needs Checkout"
+        cvs -q status | grep "File had conflicts on merge"
+        #cvs -q status | grep "?"
+        popd > /dev/null 2>&1
+    fi
+}
+
+function makeit()
+{
+    pushd .
+    cd ~/prj/srcr1
+    make
+    popd
+}
+
+function makeclean()
+{
+    pushd .
+    cd ~/prj/srcr1
+    make clean
+    popd
+}
+
+function cmdls()
+{
+    echo
+    echo "bash_profile command menu"
+    echo "-------------------------"
+    echo "cmdls - lists all the commands"
+    echo "myide - generates six xterm window in the right places"
+    echo "projdir - push to the project directory"
+    echo "makeit"
+    echo "sshmike"
+    echo "telnetipem"
+    echo "newc $1 - generates a new .c from template with $1 as the name"
+    echo "newh $1 - generates a new .h from template with $1 as the name"
+    echo "newcpp $1 - generates a new .cpp from template with $1 as the name"
+    echo "refresh - Reloads the .bash_profile script"
+    echo "vprofile - opens .bash_profile for editing"
+    echo "vtemplate - opens .c and .h template files for editing"
+    echo "maketags - Create tags of all files in ~/prj/srcr1 and dumps in pwd"
+    echo "ls_scripts - lists all the scripts that I have"
+    echo "cd_scripts - CD into the scripts directory. Use popd to return to"
+    echo "see_log - This tails the /var/log/messages file on a separate xterm"
+    echo "          original directory"
+    echo "x - create an xterm window"
+    echo "build_db - builds cscope db for all files under specified dir"
+    echo "build_kernel_db - builds cscope db for i386 kernel only"
+    echo "branch - cd into ~/branch/prj/srcr1"
+    echo "diff_dir <dir1> <dir2> - do a diff between 2 directories"
+    echo "diff_dir_more <dir1> <dir2> - do a detailed diff between 2 directories"
+    echo "connect_me - connects me to my linux workstation at work"
+    echo "set_branch_env - sets up the environment to build optovia branch src"
+    echo "set_main_env   - sets up the environment to build optovia main line src"
+    echo "set_env        - sets up the env given the location of prj"
+    echo "create_vnc_desktop - creates a vnc desktop with number, name and resolution"
+    echo "destroy_vnc_desktop - destroys an already created vnc desktop"
+    echo "create_my_desktops  - uses create_vnc_desktop to create my vnc desktops"
+    echo "destroy_my_desktops - uses destroy_vnc_desktop to destroy all my vnc desktops"
+    echo "show_desktops - show all active vnc desktop pid files"
+    echo "build_prj - build everything in ~/prj"
+    echo "mount_smb_share	- Automount an samba share with password"
+    echo "remove_cvs_dir  - Delete all files in a CVS dir even under subdirectories or just use cvs export command to get directories without CVS dir in them"
+    echo "dent_it   - Auto indent source code files - c & h"
+    echo "dent_c_files - Search and indent all c files within a directory"
+    echo "dent_h_files - Search and indent all h files within a directory"
+    echo "ct_cmds - Lists all clearcase shortcuts I have implemented"
+    echo "mount_h_drive - mounts trueposition h drive"
+    echo "mount_t_drive - mounts trueposition t drive"
+    echo "mount_clearcase - mounts clearcase vob and view servers paths"
+    echo "ctmakeview - Creates a clearcase view"
+    echo "ctremoveview - Deletes a clearcase view"
+    echo "ctmakelabel - Labels a clearcase branch (Everything under /devvob)"
+    echo
+}
+
+
+function x()
+{
+    xterm &
+}
+
+function newcpp()
+{
+    echo "Generating $1 in current directory"
+    fileName=$1
+    #This strips of the .c at the end of the filename
+    file=${fileName%.cpp}
+    #copy template file to local directory
+    cp $templateDir/c_h/c_template.cpp .tmp
+    #replace all "filename" occurances with input filename
+    sed_cmd='s/filename/'$file'/g'
+    sed $sed_cmd .tmp > $1
+    #replace all Author with actual author
+    sed_cmd='s/Author/'$USER'/g'
+    sed $sed_cmd $1 > .tmp
+    #replace with today's date
+    TODAYS_DATE=`date +%m-%d-%y`
+    sed_cmd='s/Date/'$TODAYS_DATE'/g'
+    sed $sed_cmd .tmp > $1
+    #cat .tmp > $1
+    #delete the .tmp file
+    rm .tmp
+}
+
+
+function newc()
+{
+    echo "Generating $1 in current directory"
+    fileName=$1
+    #This strips of the .c at the end of the filename
+    file=${fileName%.c}
+    #copy template file to local directory
+    cp $templateDir/c_h/c_template.c .tmp
+    #replace all "filename" occurances with input filename
+    sed_cmd='s/filename/'$file'/g'
+    sed $sed_cmd .tmp > $1
+    sed_cmd='s/Author/'$USER'/g'
+    sed $sed_cmd $1 > .tmp
+    #replace with today's date
+    TODAYS_DATE=`date +%m-%d-%y`
+    sed_cmd='s/Date/'$TODAYS_DATE'/g'
+    sed $sed_cmd .tmp > $1
+    #cat .tmp > $1
+    #delete the .tmp file
+    rm .tmp
+}
+
+function newh()
+{
+    echo "Generating $1 in current directory"
+    fileName=$1
+    #This strips of the .h at the end of the filename
+    file=${fileName%.h}
+    #copy template file to local directory
+    cp $templateDir/c_h/c_template.h .tmp
+
+    #replace all "filename" occurances with input filename
+    sed_cmd='s/filename/'$file'/g'
+    sed $sed_cmd .tmp > $1
+
+    #replace all "FILENAME" occurances with input filename in CAPS
+    FILE=`echo $file | tr 'a-z' 'A-Z'`
+    sed_cmd='s/FILENAME/'$FILE'/g'
+    sed $sed_cmd $1 > .tmp
+
+    #replace Author with actual value
+    sed_cmd='s/Author/'$USER'/g'
+    sed $sed_cmd .tmp > $1
+
+    #replace with today's date
+    TODAYS_DATE=`date +%m-%d-%y`
+    sed_cmd='s/Date/'$TODAYS_DATE'/g'
+    sed $sed_cmd $1 > .tmp
+    cat .tmp > $1
+
+    #delete the .tmp file
+    rm .tmp
+}
+
+function refresh()
+{
+    . ~/.bash_profile
+}
+
+function vprofile()
+{
+    #gvim ~/.bash_profile
+    vim ~/.bash_profile
+}
+
+function vterm()
+{
+    /usr/X11R6/bin/xterm -sl 1000 -sb -rightbar -ms red -bg white -fg black -e /bin/bash -l &
+    # For cygwin systems
+    #  /usr/bin/xterm -sl 1000 -sb -rightbar -ms red -bg white -fg black -e /bin/bash -l &
+}
+
+function vtemplate()
+{
+    gvim -o ~/templates/c_h/c_template.c ~/templates/c_h/c_template.h ~/templates/c_h/c_template.cpp
+}
+
+function maketags()
+{
+    ctags -R *.c *.cpp *.h ~/prj/srcr1/*
+}
+
+function ls_scripts()
+{
+    ls ~/templates/scripts
+}
+
+function cd_scripts()
+{
+    pushd ~/templates/scripts
+}
+
+}
+
+bang() {
+    url="http://www.timeanddate.com/worldclock/city.html?n=438"
+
+    lynx --dump "$url" | grep iPrism >/dev/null
+
+    if [ $? -eq 0 ]
+    then
+        lynx "$url"
+    else
+        echo ""
+        lynx --dump "$url" |\
+            egrep "Current local time in Bang|Current time" |\
+            sed -e 's+^[ ][ ]*++g' -e 's+Current time ++g' -e 's+Current+# Current+g'
+        echo ""
+    fi
+}
+
+function task_banner()
+{
+    echo "  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+			COMMAND"
+}
+
+function my_tasks()
+{
+    while [ 1 ]; do
+        (date && task_banner && (top -b -n 1 | grep sudha)) | more -c
+        sleep 1
+    done
+}
+
+
+src_zip()
+{
+    if [ $# -ne 2  ]; then
+        echo "usage: src_zip <dir_to_extract_src_from> <name_of_zip_file>"
+        echo
+        return  -1
+    fi
+
+    EXT_SRC_DIR=$1
+    ZIP_FILE_NAME=$2
+
+    if [ ! -d ${EXT_SRC_DIR} ]; then
+        echo "Error: ${EXT_SRC_DIR} is not a valid directory!"
+        return 1;
+    fi
+
+    SRC_SEARCH_PATTERN="-name *.[ch] -o -name [Mm]akefile -o -name *.mk \
+        -o -name *.sh -name ChangeLog -o -name README \
+        -o -name Makefile.in -name INDEX -o -name *.[1-9] \
+        -o -name configure -o -name *.c[px][px] -o -name *.pl"
+
+    find ${EXT_SRC_DIR} ${SRC_SEARCH_PATTERN} | xargs zip ${ZIP_FILE_NAME}
+    if [ $? -ne 0 ]; then
+        echo "Error creating ${ZIP_FILE_NAME}: Err# $?"
+        return 1
+    fi
+
+    echo "Created ${ZIP_FILE_NAME}.zip in " `pwd`
+    echo "DONE"
+    return 0
+}
+
+#indents c source code
+function dent_it
+{
+    if [ -z "${1}" ]; then
+        echo "Usage: dent_it input_file [outfile] [my_code]"
+        echo "       if outfile is not specified then input file is used for"
+        echo "       output. If my_code is selected then new lines are honored."
+        return 1
+    fi
+
+    InputFile="${1}"
+    # if second file is not provided then use the source as the destination
+    if [ -z "${2}" ]; then
+        OutputFile="${1}"
+    else
+        OutputFile="${2}"
+    fi
+    # cli[n]  - cause case labels to be indented n tab stop
+    # bbb     - blank line before every block coment
+    # nbbb    - no block line before every block comment
+    # bl      - lines up parens in gnu style
+    # br      - lines up parens in K & R style
+    # ce      - cuddle "else" with preceding close braces
+    # nce     - no cuddle "else" with preceding close braces
+    # ci[n]   - continutation line indent for current statement
+    # d[n]    - Control the placement of comments which are not to  the
+    #           right  of  codeSpecifying  -d0  lines up comments with the code
+    # di[n]   - Specify the indentation, in character positions, from a
+    #           declaration   keyword   to  the  following  identifier
+    # fc1     - Enables the  formatting  of  comments  that start  in  column 1
+    # i[n]    - The number of spaces for  one  indentation  level.  The default
+    #           is one tab stop, -i8.
+    # ip      - Enables  the   indentation   of   parameter declarations from the
+    #           left margin
+    # l[n]    - Maximum length of an output line with a  trailing  comment
+    # lc[n]   - Sets the line length  for  block  comments  to  n.   It
+    #           defaults  to being the same as the usual line length as
+    #           specified with -l.
+    # lp      - Lines up code surrounded by parenthesis in continuation lines.
+    #           with -nlp in effect:
+    #             p1 = first_procedure(second_procedure(p2, p3),
+    #                            third_procedure(p4, p5));
+    #
+    #           With -lp in effect (the default) the code  looks  some-
+    #           what clearer:
+    #             p1 = first_procedure(second_procedure(p2, p3),
+    #                                    third_procedure(p4, p5));
+    # npcs    - If true (-pcs) all procedure calls and declarations  in
+    #           the  source code will have a space inserted between the
+    #           name and the '('.  Default:  -npcs
+    # npsl    - If true (-psl) the names of  procedures  being  defined
+    #           are  placed  in column 1 - their types, if any, will be
+    #           left on the previous lines. Default:  -psl.
+    # sc      - Enables (disables) the placement of asterisks (`*'s) at
+    #           the left edge of all comments. Default:  -sc.
+    # nsob    - If -sob is  specified,  indent  will  swallow  optional
+    #           blank  lines.   You  can  use  this to get rid of blank
+    #           lines after declarations.  Default:  -nsob.
+    # cdb     - comment delimiters on blank lines.
+    # nei     - ifs following elses will be indented
+    # bad     - blank lines after declarations
+    # bli[n]  - Indent braces n spaces.
+    # bls     - braces after struct declaration line
+    # c[0]    - put comments to the right of the code in column n
+    # cbi[n]  - case brace indent after n spaces below label
+    # cd[n]   - put comments to the right of the declarations in column n
+    # bap     - block line after procedure end
+
+    #Options_1="-cli0 -nbbb -nce -bl -ci4 -d0 -di0 -fc1 -i2 -l80 -lc80"
+    #Options_1="-gnu"
+    #Options_1="-nbad -bap -bbb -nbbo -nbc -br -bli1 -bls -cbi0 -ncdb -nce -ci4 -cli0 -ncs -d0 -di0 -fc1 -nfca -hnl -i4 -ip4 -l80 -lc80 -lp -npcs -pi4 -nprs -npsl -sbi0 -sc -nsob -ss -ts8"
+
+    Options_1="-cli2 -nbbb -nce -bl -ci4 -d0 -di0 -fc1 -i2 -sc -nsob -npcs"
+    Options_2=" -cdb -dj -bad -bli0 -bls -c0 -cbi2 -cd0 -bap -ss -prs -lp -npsl"
+    Options_3=" -ts2 -l78 -nbbo -pmt --no-tabs -ip2"
+    if [ -z "${3}" ]; then
+        CODE_STATE="--ignore-newlines"
+    else
+        if [ ${3} == "my_code" ]; then
+            echo "my_code: honoring new lines"
+            CODE_STATE="-hnl"
+        fi
+    fi
+    Options="${Options_1} ${Options_2} ${Options_3} ${CODE_STATE}"
+
+    indent ${Options} ${InputFile} -o ${OutputFile}
+}
+
+dent_c_files()
+{
+    VIJ_FILE_LST=`find . -name *.c`
+    for x in ${VIJ_FILE_LST}; do
+        echo ${x};
+        dent_it ${x};
+    done
+}
+
+dent_h_files()
+{
+    VIJ_FILE_LST=`find . -name *.h`
+    for x in ${VIJ_FILE_LST}; do
+        echo ${x};
+        dent_it ${x};
+    done
+}
+
+
+mount_iso()
+{
+    ISO_IMAGE=${1}
+    ISO_MNT_POINT="/mnt/iso"
+    if [ "${1}" = "" ]; then
+        echo "Usage: mount_iso <path_to_iso_image>"
+    fi
+
+    sudo mount ${ISO_IMAGE} ${ISO_MNT_POINT} -t iso9660 -o loop=/dev/loop0
+    if [ $? -ne 0 ]; then
+        echo "Failed to mount ${1} on ${ISO_MNT_POINT}"
+        return 1
+    fi
+
+    echo "Mounted ${1} on ${ISO_MNT_POINT}"
+}
+
+umount_iso()
+{
+    ISO_MNT_POINT="/mnt/iso"
+    sudo umount ${ISO_MNT_POINT}
+    echo "Unmounted ${ISO_MNT_POINT}"
+}
+
+sshto()
+{
+    echo "Choose target:"
+    echo "1. PatriotsESX1-W Woodcrest 1 (192.168.192.230)"
+    echo "2. PatriotsESX2-W Woodcrest 2 (192.168.192.231)"
+    read choice
+    case ${choice} in
+        1)
+            echo "Connecting to: tpadmin @ PatriotsSmlc-L Woodcrest 1"
+            ssh -X esxdmin@192.168.192.230
+            ;;
+        2)
+            echo "Connecting to: tpadmin @ PatriotsSmlc-L Woodcrest 2"
+            ssh -X esxadmin@192.168.192.231
+            ;;
+        *)
+            echo "Please choose an entry from the given ssh list."
+            echo
+            return 1
+            ;;
+    esac
+
+    return 0
+}
+
+function switch2win()
+{
+    ### This script helps tell the kvm to swtich to the windows screen
+    ### works in opensuse 11.2 connected to Trendnet TK-209 KVM
+    xset led 3; sleep 1; xset led 3 led off
+    sleep 2;
+    xset led 3; sleep 1; xset led 3 led off
+}
+
+function ls_with_full_path()
+{
+    find `pwd` -print
+}
+
